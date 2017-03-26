@@ -1,2 +1,1 @@
-# warlords_lobby
-Lobby for warlords
+# warlords_server
