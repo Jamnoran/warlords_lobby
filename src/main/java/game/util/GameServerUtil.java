@@ -27,7 +27,7 @@ public class GameServerUtil {
 				System.out.println(server.getId() + " Ip : " + server.getIp() + " : " + server.getPort());
 				Log.i(TAG, "Connect and see if available for creating a games");
 				GameSlotResponse gameSlotResponse = GameServerUtil.checkGameServer(server, gameType);
-				if (gameSlotResponse.isAvailable()) {
+				if (gameSlotResponse != null && gameSlotResponse.isAvailable()) {
 					Log.i(TAG, "This server Have room! Join it!");
 					server.setGameId(gameSlotResponse.getGameId());
 					return server;
