@@ -142,9 +142,21 @@ public class LobbyServerDispatcher extends Thread {
 			Server server = GameServerUtil.getGameServer(gameType);
 			if (server != null) {
 				// Send message to all lobbys to send out to users that we have a game
+				for(LFG lfg : group){
+					ClientInfo cInfo = getClientByUserId(lfg.getHeroId());
+					// Send to this lobbys users as well
+					if (cInfo != null && cInfo.getId() != null) {
+						dispatchMessage(new Message(cInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), cInfo.getHeroId(), server.getGameId()))));
+					} else {
+						Log.i(TAG, "Client is null, what happened?");
+					}
+				}
+				if (clientInfo != null && clientInfo.getId() != null) {
+					dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()))));
+				} else {
+					Log.i(TAG, "Client is null, what happened?");
+				}
 
-				// Send to this lobbys users as well
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), myHero.getId(), server.getGameId()))));
 			}else{
 				Log.i(TAG, "Did not find a server to connect to.... What to doooo?");
 			}
@@ -164,8 +176,15 @@ public class LobbyServerDispatcher extends Thread {
 		}
 	}
 
-
-
+	private ClientInfo getClientByUserId(Integer heroId) {
+		for (int i = 0; i < mClients.size(); i++) {
+			ClientInfo clientInfo = (ClientInfo) mClients.get(i);
+			if(clientInfo.getHeroId() == heroId){
+				return clientInfo;
+			}
+		}
+		return null;
+	}
 
 
 	private String getCountOfTypesOfClients() {
