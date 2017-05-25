@@ -1,10 +1,7 @@
 package game.util;
 
 import game.logging.Log;
-import game.vo.Ability;
-import game.vo.Hero;
-import game.vo.LFG;
-import game.vo.User;
+import game.vo.*;
 import game.vo.classes.Priest;
 import game.vo.classes.Warrior;
 
@@ -347,6 +344,64 @@ public class DatabaseUtil {
 			e.printStackTrace();
 		}
 	}
+
+
+
+	public static void addChatMessage(int userId, String message, int groupId, long time){
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				String query = "INSERT INTO `warlords`.`chat` (`user_id`, `message`, `group_id`, `time`) VALUES (" + userId + ", '" + message + "', " + groupId + ", " + time + ")";
+				stmt.executeUpdate(query);
+				int autoIncKeyFromApi = -1;
+				ResultSet rs = stmt.getGeneratedKeys();
+				if (rs.next()) {
+					autoIncKeyFromApi = rs.getInt(1);
+				} else {
+					// throw an exception from here
+					Log.i(TAG, "Could not get user_id");
+				}
+//				message.setId(autoIncKeyFromApi);
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+	}
+
+	public static ArrayList<ChatMessage> getMessagesLastHour(){
+		ArrayList<ChatMessage> messages = new ArrayList<>();
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT id, user_id, message, group_id, time FROM chat");
+				while (rs.next()) {
+					ChatMessage message = new ChatMessage();
+					//Retrieve by column name
+					message.setId(rs.getInt("id"));
+					message.setMessage(rs.getString("message"));
+					message.setUserId(rs.getInt("user_id"));
+					message.setGroupId(rs.getInt("group_id"));
+					message.setTime(rs.getInt("time"));
+					messages.add(message);
+				}
+				rs.close();
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+		return messages;
+	}
+
 
 
 	public static Connection getConnection() {
