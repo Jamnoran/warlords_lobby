@@ -282,6 +282,7 @@ public class Hero {
 				", criticalChance=" + criticalChance +
 				'}';
 	}
+
 	public String getSqlInsertLFGQuery(String gameType, String lobbyId) {
 		return "INSERT INTO `warlords`.`lfg` (`user_id`, `game_type`, `hero_id`, `lobby_id`) VALUES ('" + getUser_id() + "', '" + gameType + "', '" + getId() + "', '" + lobbyId + "')";
 	}
