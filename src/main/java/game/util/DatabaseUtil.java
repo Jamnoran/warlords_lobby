@@ -13,6 +13,10 @@ import java.util.ArrayList;
  */
 public class DatabaseUtil {
 	private static final String TAG = DatabaseUtil.class.getSimpleName();
+	private static String ip = "192.168.0.191";
+	private static String user = "ErCa";
+	private static String password = "test";
+
 
 	public static User createUser(User user) {
 		Connection connection = getConnection();
@@ -259,22 +263,28 @@ public class DatabaseUtil {
 		return hero;
 	}
 
-	public static ArrayList<LFG> getHeroesInLFG() {
+	public static ArrayList<LFG> getLFG() {
 		ArrayList<LFG> lfgs = new ArrayList<>();
 		Connection connection = getConnection();
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT lfg.id, lfg.user_id, lfg.game_type, lfg.hero_id, heroes.class_type, heroes.top_game_lvl FROM lfg, heroes WHERE lfg.hero_id = heroes.id group by lfg.id");
+				ResultSet rs = stmt.executeQuery("SELECT * from lfg");
 				while (rs.next()) {
 					LFG lfg = new LFG();
 					//Retrieve by column name
 					lfg.setId(rs.getInt("id"));
-					lfg.setGameType(rs.getString("lfg.game_type"));
-					lfg.setUserId(rs.getInt("lfg.user_id"));
-					lfg.setHeroId(rs.getInt("lfg.hero_id"));
-					lfg.setHighestLevel(rs.getInt("heroes.top_game_lvl"));
-					lfg.setClassType(rs.getString("heroes.class_type"));
+					lfg.setGameType(rs.getString("game_type"));
+					lfg.setHeroId1(rs.getInt("hero_id_1"));
+					lfg.setHeroClass1(rs.getString("hero_class_1"));
+					lfg.setHeroId2(rs.getInt("hero_id_2"));
+					lfg.setHeroClass2(rs.getString("hero_class_2"));
+					lfg.setHeroId3(rs.getInt("hero_id_3"));
+					lfg.setHeroClass3(rs.getString("hero_class_3"));
+					lfg.setHeroId4(rs.getInt("hero_id_4"));
+					lfg.setHeroClass4(rs.getString("hero_class_4"));
+					lfg.setMaxPlayers(rs.getInt("max_players"));
+					lfg.setHeroesJoined(rs.getInt("heroes_joined"));
 					lfgs.add(lfg);
 				}
 				rs.close();
@@ -289,12 +299,13 @@ public class DatabaseUtil {
 		return lfgs;
 	}
 
-	public static void addHeroLFG(Hero hero, String gameType, String lobbyId) {
+	public static void addLFG(LFG lfg, String gameType) {
 		Connection connection = getConnection();
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				stmt.executeUpdate(hero.getSqlInsertLFGQuery(gameType, lobbyId));
+				Log.i(TAG , "Mysql query: " + lfg.getSqlInsertLFGQuery(gameType));
+				stmt.executeUpdate(lfg.getSqlInsertLFGQuery(gameType));
 				int autoIncKeyFromApi = -1;
 				ResultSet rs = stmt.getGeneratedKeys();
 				if (rs.next()) {
@@ -303,7 +314,7 @@ public class DatabaseUtil {
 					// throw an exception from here
 					Log.i(TAG, "Could not get user_id");
 				}
-				hero.setId(autoIncKeyFromApi);
+				lfg.setId(autoIncKeyFromApi);
 				stmt.close();
 				connection.close();
 			} catch (SQLException e) {
@@ -413,7 +424,7 @@ public class DatabaseUtil {
 			return null;
 		}
 		try {
-			return DriverManager.getConnection("jdbc:mysql://192.168.0.215:8889/warlords", "root", "root");
+			return DriverManager.getConnection("jdbc:mysql://" + ip + ":9996/warlords", user, password);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! Check output console");
 			e.printStackTrace();
