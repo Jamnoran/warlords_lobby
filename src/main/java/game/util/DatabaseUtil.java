@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class DatabaseUtil {
 	private static final String TAG = DatabaseUtil.class.getSimpleName();
-	private static String ip = "192.168.0.191";
+	private static String ip = "warlord.ga";
 	private static String user = "ErCa";
 	private static String password = "test";
 
@@ -424,12 +424,6 @@ public class DatabaseUtil {
 			return null;
 		}
 		try {
-<<<<<<< HEAD
-=======
-			String ip = "192.168.0.191";
-			String user = "ErCa";
-			String password = "test";
->>>>>>> a0a39f016fde6f86f7aa92bb65e738aff514fd97
 			return DriverManager.getConnection("jdbc:mysql://" + ip + ":9996/warlords", user, password);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! Check output console");
