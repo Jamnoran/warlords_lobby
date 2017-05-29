@@ -172,7 +172,7 @@ public class LobbyServerDispatcher extends Thread {
 				groupUserIsIn.setHeroClass1(hero.getClass_type());
 				groupUserIsIn.setHeroesJoined(groupUserIsIn.getHeroesJoined() + 1);
 				groups.add(groupUserIsIn);
-				groupUserIsIn.setLobbyId(lobbyId);
+				groupUserIsIn.setHerolobby1(lobbyId);
 				Log.i(TAG, "Lobby id : " + lobbyId);
 				DatabaseUtil.addLFG(groupUserIsIn, gameType);
 				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));

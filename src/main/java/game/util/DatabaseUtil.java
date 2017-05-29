@@ -277,12 +277,16 @@ public class DatabaseUtil {
 					lfg.setGameType(rs.getString("game_type"));
 					lfg.setHeroId1(rs.getInt("hero_id_1"));
 					lfg.setHeroClass1(rs.getString("hero_class_1"));
+					lfg.setHerolobby1(rs.getString("hero_lobby_1"));
 					lfg.setHeroId2(rs.getInt("hero_id_2"));
 					lfg.setHeroClass2(rs.getString("hero_class_2"));
+					lfg.setHerolobby2(rs.getString("hero_lobby_2"));
 					lfg.setHeroId3(rs.getInt("hero_id_3"));
 					lfg.setHeroClass3(rs.getString("hero_class_3"));
+					lfg.setHerolobby3(rs.getString("hero_lobby_3"));
 					lfg.setHeroId4(rs.getInt("hero_id_4"));
 					lfg.setHeroClass4(rs.getString("hero_class_4"));
+					lfg.setHerolobby4(rs.getString("hero_lobby_4"));
 					lfg.setMaxPlayers(rs.getInt("max_players"));
 					lfg.setHeroesJoined(rs.getInt("heroes_joined"));
 					lfgs.add(lfg);
