@@ -51,6 +51,7 @@ public class Lobby {
 			if (!lobby.getId().equals(response.getId())) {
 				Log.i(TAG, "Added other lobby to list : " + lobby.getIp() + " : " + lobby.getPort());
 				ClientInfo clientInfo = lobby.startConnection(lobbyServerDispatcher.getNextClientId(), lobbyServerDispatcher);
+				lobby.setClientInfoId(clientInfo.getId());
 				if (clientInfo != null) {
 					lobbyServerDispatcher.addClient(clientInfo);
 				}else {
@@ -113,5 +114,4 @@ public class Lobby {
 		}
 		return null;
 	}
-
 }

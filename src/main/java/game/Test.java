@@ -3,6 +3,7 @@ package game;
 import game.logging.Log;
 import game.util.DatabaseUtil;
 import game.vo.Hero;
+import game.vo.LFG;
 
 public class Test {
 
@@ -118,7 +119,21 @@ public class Test {
 		//String responseTypeString = "\"request_type\":\"";
 		//String newJson = json.substring(json.indexOf(responseTypeString) + responseTypeString.length());
 		//System.out.println(newJson.substring(0, newJson.indexOf("\"")));
-		Hero hero = DatabaseUtil.getHero(16);
-		Log.i(TAG, "Hero : " + hero.toString());
+//		Hero hero = DatabaseUtil.getHero(16);
+//		Log.i(TAG, "Hero : " + hero.toString());
+
+
+//		LFG lfg = new LFG();
+//		lfg.setHeroClass1("WARRIOR");
+//		lfg.setHeroId1(12);
+//		lfg.setHerolobby1("123456");
+//		lfg.setHighestLevel(11);
+//		lfg.setHeroesJoined(1);
+//		DatabaseUtil.addLFG(lfg, "QUICK");
+
+
+		DatabaseUtil.deleteHeroLFG(13);
+
+
 	}
 }

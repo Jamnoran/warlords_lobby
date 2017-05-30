@@ -325,34 +325,53 @@ public class DatabaseUtil {
 		}
 	}
 
-	public static void updateHeroLfg(LFG heroInDatabase, Hero myHero, String gameType) {
-		Connection connection = getConnection();
-		if (connection != null) {
+	public static void deleteHeroLFG(Integer heroId) {
+		LFG lfgToRemoveFrom = null;
+		int position = 0;
+		String lobby = null;
+
+		ArrayList<LFG> groups = getLFG();
+		for (LFG lfg : groups){
+			if(lfg.getHeroId1() == heroId){
+				position = 1;
+				lfgToRemoveFrom = lfg;
+				lobby = lfg.getHerolobby1();
+			}else if(lfg.getHeroId2() == heroId){
+				position = 2;
+				lfgToRemoveFrom = lfg;
+				lobby = lfg.getHerolobby2();
+			}else if(lfg.getHeroId3() == heroId){
+				position = 3;
+				lfgToRemoveFrom = lfg;
+				lobby = lfg.getHerolobby3();
+			}else if(lfg.getHeroId4() == heroId){
+				position = 4;
+				lfgToRemoveFrom = lfg;
+				lobby = lfg.getHerolobby4();
+			}
+		}
+
+		if(lfgToRemoveFrom != null){
+			Connection connection = getConnection();
+			Log.i(TAG, "Deleting from lfg, heroId: " + heroId);
+			String SQL;
+			if(lfgToRemoveFrom.getHeroesJoined() == 1){
+				SQL = "DELETE from lfg where id = " + lfgToRemoveFrom.getId();
+			}else{
+				SQL = "UPDATE lfg set heroes_joined = heroes_joined - 1, hero_id_"+position+"=null, hero_lobby_"+position+"=null, hero_class_"+position+"=null where id=\"" + lfgToRemoveFrom.getId() + "\"";
+			}
+
+			Log.i(TAG, "Sql query [" + SQL + "]");
+			PreparedStatement pstmt;
 			try {
-				Statement stmt = connection.createStatement();
-				stmt.executeUpdate(myHero.getSqlUpdateLFGQuery(heroInDatabase, gameType));
-				stmt.close();
+				pstmt = connection.prepareStatement(SQL);
+				pstmt.executeUpdate();
+				pstmt.close();
 				connection.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		} else {
-			Log.i(TAG, "Failed to make connection!");
-		}
-	}
-
-	public static void deleteHeroLFG(Integer heroId, Integer user_id) {
-		Connection connection = getConnection();
-		Log.i(TAG, "Deleting from lfg, heroId: " + heroId + " userId: " + user_id);
-		String SQL = "DELETE FROM lfg WHERE hero_id = " + heroId + " and user_id = " + user_id;
-		PreparedStatement pstmt;
-		try {
-			pstmt = connection.prepareStatement(SQL);
-			pstmt.executeUpdate();
-			pstmt.close();
-			connection.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
+			Log.i(TAG, "Update all lobbys");
 		}
 	}
 
