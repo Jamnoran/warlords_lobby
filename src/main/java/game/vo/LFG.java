@@ -168,6 +168,10 @@ public class LFG {
 		return "INSERT INTO lfg set game_type=\"" + gameType + "\", hero_lobby_1=\"" + herolobby1 + "\"" + ", hero_id_1=\"" + heroId1 + "\", hero_class_1=\"" + heroClass1 + "\", max_players=\"" + maxPlayers + "\", heroes_joined=\"" + heroesJoined + "\"";
 	}
 
+	public String getSqlUpdateLFGQuery() {
+		return "UPDATE lfg set hero_id_1="+heroId1+", hero_lobby_1=\"" + herolobby1 + "\", hero_class_1=\"" + heroClass1 + "\", hero_id_2=" + heroId2 + ", hero_lobby_2=\"" + herolobby2 + "\", hero_class_2=\"" + heroClass2 + "\", hero_id_3=" + heroId3 + ", hero_lobby_3=\"" + herolobby3 + "\", hero_class_3=\"" + heroClass3 + "\", hero_id_4=" + heroId4 + ", hero_lobby_4=\"" + herolobby4 + "\", hero_class_4=\"" + heroClass4 + "\", heroes_joined=" + getHeroesJoined() + " where id=" + getId();
+	}
+
 	@Override
 	public String toString() {
 		return "LFG{" +
@@ -190,4 +194,5 @@ public class LFG {
 				", maxPlayers=" + maxPlayers +
 				'}';
 	}
+
 }

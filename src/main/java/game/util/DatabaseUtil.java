@@ -3,6 +3,8 @@ package game.util;
 import game.logging.Log;
 import game.vo.*;
 import game.vo.classes.Priest;
+import game.vo.classes.Rogue;
+import game.vo.classes.Warlock;
 import game.vo.classes.Warrior;
 
 import java.sql.*;
@@ -175,6 +177,10 @@ public class DatabaseUtil {
 						hero = new Warrior();
 					}else if(rs.getString("class_type").equals(Hero.PRIEST)){
 						hero = new Priest();
+					}else if(rs.getString("class_type").equals(Hero.WARLOCK)){
+						hero = new Warlock();
+					}else if(rs.getString("class_type").equals(Hero.ROGUE)){
+						hero = new Rogue();
 					}else{
 						Log.i(TAG, "Cant find class: [" + rs.getString("class_type") + "]");
 					}
@@ -329,6 +335,24 @@ public class DatabaseUtil {
 		}
 	}
 
+
+	public static void updateLFG(LFG group) {
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				Log.i(TAG , "Mysql query: " + group.getSqlUpdateLFGQuery());
+				stmt.executeUpdate(group.getSqlUpdateLFGQuery());
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+	}
+
 	public static void deleteHeroLFG(Integer heroId) {
 		LFG lfgToRemoveFrom = null;
 		int position = 0;
@@ -362,7 +386,7 @@ public class DatabaseUtil {
 			if(lfgToRemoveFrom.getHeroesJoined() == 1){
 				SQL = "DELETE from lfg where id = " + lfgToRemoveFrom.getId();
 			}else{
-				SQL = "UPDATE lfg set heroes_joined = heroes_joined - 1, hero_id_"+position+"=null, hero_lobby_"+position+"=null, hero_class_"+position+"=null where id=\"" + lfgToRemoveFrom.getId() + "\"";
+				SQL = "UPDATE lfg set heroes_joined = heroes_joined - 1, hero_id_" + position + "=null, hero_lobby_" + position + "=null, hero_class_" + position + "=null where id=\"" + lfgToRemoveFrom.getId() + "\"";
 			}
 
 			Log.i(TAG, "Sql query [" + SQL + "]");
@@ -376,6 +400,7 @@ public class DatabaseUtil {
 				e.printStackTrace();
 			}
 			Log.i(TAG, "Update all lobbys");
+
 		}
 	}
 
