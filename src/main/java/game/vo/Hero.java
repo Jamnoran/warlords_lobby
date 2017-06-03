@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class Hero {
 	public static final String WARRIOR = "WARRIOR";
 	public static final String PRIEST = "PRIEST";
+	public static final String WARLOCK = "WARLOCK";
+	public static final String ROGUE = "ROGUE";
 	private static final String TAG = Hero.class.getSimpleName();
 
 	// General stats

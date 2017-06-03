@@ -52,6 +52,7 @@ public class Lobby {
 				Log.i(TAG, "Added other lobby to list : " + lobby.getIp() + " : " + lobby.getPort());
 				ClientInfo clientInfo = lobby.startConnection(lobbyServerDispatcher.getNextClientId(), lobbyServerDispatcher);
 				if (clientInfo != null) {
+					lobby.setClientInfoId(clientInfo.getId());
 					lobbyServerDispatcher.addClient(clientInfo);
 				}else {
 					Log.i(TAG, "Removing server we could not contact " + lobby.getIp() + ":" +lobby.getPort() + " - " + lobby.getId());
@@ -113,5 +114,4 @@ public class Lobby {
 		}
 		return null;
 	}
-
 }

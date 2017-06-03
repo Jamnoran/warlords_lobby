@@ -97,6 +97,9 @@ public class LobbyServerDispatcher extends Thread {
 						heroesJson = "{}";
 					}
 					dispatchMessage(new Message(clientInfo.getId(), "{\"response_type\":\"HEROES\", \"heroes\" : [" + heroesJson + "]}"));
+				}else if (request.getRequestType().equals("LFG_RESPONSE")){
+					LFGResponse lfgResponse = gson.fromJson(aMessage.getMessage(), LFGResponse.class);
+					handleLfgResponse(lfgResponse);
 				}
 			}
 		}
@@ -105,93 +108,268 @@ public class LobbyServerDispatcher extends Thread {
 		}
 	}
 
-	/**
-	 * Send ip + port + gameId to client then let client handle joining a game server
-	 * @param clientInfo
-	 * @param gameType (QUICK, CUSTOM)
-	 */
-	private void clientJoinServer(ClientInfo clientInfo, String gameType) {
-		int playersForParty = 2;
-		if (gameType.equals("CUSTOM")){
 
-			Server server = getGameServer(gameType, null, clientInfo);
-
-		}else {
-		// Get a server that the client can join
-		// Get all users in LFG table in db then check if we got full group
-			LFG heroInDatabase = null;
-			ArrayList<LFG> group = new ArrayList<>();
-			ArrayList<LFG> heroes = DatabaseUtil.getHeroesInLFG();
-			Hero myHero = DatabaseUtil.getHero(clientInfo.heroId);
-			for (LFG hero : heroes){
-				Log.i(TAG, "Hero looking for group " + hero.getClassType() + " highest level  " + hero.getHighestLevel());
-				if (hero.getHeroId() != myHero.getId()) {
-					if(!hero.getClassType().equals(myHero.getClass_type())){
-						// TODO: Check if hero is still online
-						group.add(hero);
-					}else {
-						Log.i(TAG, "Don't want a hero with the same class");
-					}
-				} else {
-					Log.i(TAG, "Found previous lfg of this user, update this instead of inserting new");
-					heroInDatabase = hero;
-				}
-			}
-			if ((group.size() + 1) == playersForParty) {
-				Log.i(TAG, "Found group to play with");
-
-
-				Server server = getGameServer(gameType, group, clientInfo);
-
-				// Remove from database
-				for(LFG heroesInGroup : group){
-					DatabaseUtil.deleteHeroLFG(heroesInGroup.getHeroId(), heroesInGroup.getUserId());
-				}
-			} else {
-				Log.i(TAG, "Did not find group");
-				if (heroInDatabase != null) {
-					DatabaseUtil.updateHeroLfg(heroInDatabase, myHero, gameType);
-				} else {
-					DatabaseUtil.addHeroLFG(myHero, gameType, getLobbyId());
-				}
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
-			}
-		}
-
-	}
-
-	private Server getGameServer(String gameType, ArrayList<LFG> group, ClientInfo clientInfo){
-		// Get all game servers and check if one has room for a new game
-		Server server = GameServerUtil.getGameServer(gameType);
-		if (server != null) {
-			// Send message to all lobbys to send out to users that we have a game
-			if (group != null) {
-				for (LFG lfg : group) {
-					ClientInfo cInfo = getClientByUserId(lfg.getHeroId());
-					// Send to this lobbys users as well
-					if (cInfo != null && cInfo.getId() != null) {
-						dispatchMessage(new Message(cInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), cInfo.getHeroId(), server.getGameId()))));
-					} else {
-						Log.i(TAG, "Client is null, what happened?");
-					}
-				}
-			}
+	private void clientJoinServer(ClientInfo clientInfo, String gameType){
+		LFG groupUserIsIn = new LFG();
+		if(gameType.equals("CUSTOM")){
+			// Send to this lobbys users as well
 			if (clientInfo != null && clientInfo.getId() != null) {
+				Server server = GameServerUtil.getGameServer(gameType);
 				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()))));
+				Log.i(TAG, "User wanted to play custom game, sending server");
 			} else {
 				Log.i(TAG, "Client is null, what happened?");
 			}
-
 		}else{
-			Log.i(TAG, "Did not find a server to connect to.... What to doooo?");
+
+			Hero hero = DatabaseUtil.getHero(clientInfo.heroId);
+			ArrayList<LFG> groups = DatabaseUtil.getLFG();
+
+			Log.i(TAG, "Hero wants to join a quick game : " + hero.getId() + " class : " + hero.getClass_type());
+
+			boolean alreadySearching = false;
+			boolean foundGroup = false;
+			Iterator<LFG> lfgIterator = groups.iterator();
+			while (lfgIterator.hasNext()) {
+				LFG group = lfgIterator.next(); // must be called before you can call i.remove()
+				if(group.getHeroesJoined() < group.getMaxPlayers()){
+					Log.i(TAG, "Found a group that is not full");
+					boolean partyHasClassAlready = false;
+					if((group.getHeroClass1() != null && group.getHeroClass1().equals(hero.getClass_type())) ||
+							(group.getHeroClass2() != null && group.getHeroClass2().equals(hero.getClass_type())) ||
+							(group.getHeroClass3() != null && group.getHeroClass3().equals(hero.getClass_type())) ||
+							(group.getHeroClass4() != null && group.getHeroClass4().equals(hero.getClass_type()))){
+						partyHasClassAlready = true;
+					}
+					if(group.getHeroId1() == clientInfo.heroId
+							|| group.getHeroId2() == clientInfo.heroId
+							|| group.getHeroId3() == clientInfo.heroId
+							|| group.getHeroId4() == clientInfo.heroId){
+						alreadySearching = true;
+						groupUserIsIn = group;
+					}
+					Log.i(TAG, "This hero is already searching " + alreadySearching + " Group already has this class : " + partyHasClassAlready);
+					if(!partyHasClassAlready){
+						if(group.getHeroId1() == null || group.getHeroId1() == 0){
+							group.setHeroId1(hero.getId());
+							group.setHeroClass1(hero.getClass_type());
+							group.setHerolobby1(lobbyId);
+							Log.i(TAG, "Adding hero to position 1");
+						}else if (group.getHeroId2() == null || group.getHeroId2() == 0){
+							group.setHeroId2(hero.getId());
+							group.setHeroClass2(hero.getClass_type());
+							group.setHerolobby2(lobbyId);
+							Log.i(TAG, "Adding hero to position 2");
+						} else if (group.getHeroId3() == null || group.getHeroId3() == 0){
+							group.setHeroId3(hero.getId());
+							group.setHeroClass3(hero.getClass_type());
+							group.setHerolobby3(lobbyId);
+							Log.i(TAG, "Adding hero to position 3");
+						} else if (group.getHeroId4() == null || group.getHeroId4() == 0){
+							group.setHeroId4(hero.getId());
+							group.setHeroClass4(hero.getClass_type());
+							group.setHerolobby4(lobbyId);
+							Log.i(TAG, "Adding hero to position 4");
+						}
+						group.setHeroesJoined(group.getHeroesJoined() + 1);
+
+						String gameFoundResponse = null;
+						if(group.getHeroesJoined() == group.getMaxPlayers()){
+							// Should we really remove it at this stage?
+							//lfgIterator.remove();
+
+							Server server = GameServerUtil.getGameServer(gameType);
+							gameFoundResponse = new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()));
+							dispatchMessage(new Message(clientInfo.getId(), gameFoundResponse));
+						}
+
+						// Send message to all in group.
+						if (!group.getHeroId1().equals(clientInfo.getHeroId()) && group.getHerolobby1() != null) {
+							if (!group.getHerolobby1().equals(lobbyId)) {
+								sendMessageToLobby(group.getHerolobby1(), new Gson().toJson(new LFGResponse(group)));
+								if(gameFoundResponse != null){ sendMessageToLobby(group.getHerolobby1(), gameFoundResponse); }
+							}else {
+								dispatchMessage(new Message(getClientByHeroId(group.getHeroId1()).getId(), new Gson().toJson(new LFGResponse(group))));
+								if(gameFoundResponse != null){ dispatchMessage(new Message(getClientByHeroId(group.getHeroId1()).getId(), gameFoundResponse)); }
+							}
+						}
+						if (!group.getHeroId2().equals(clientInfo.getHeroId()) && group.getHerolobby2() != null) {
+							if (!group.getHerolobby2().equals(lobbyId)) {
+								sendMessageToLobby(group.getHerolobby2(), new Gson().toJson(new LFGResponse(group)));
+								if(gameFoundResponse != null){ sendMessageToLobby(group.getHerolobby1(), gameFoundResponse); }
+							} else {
+								dispatchMessage(new Message(getClientByHeroId(group.getHeroId2()).getId(), new Gson().toJson(new LFGResponse(group))));
+								if(gameFoundResponse != null){ dispatchMessage(new Message(getClientByHeroId(group.getHeroId2()).getId(), gameFoundResponse)); }
+							}
+						}
+						if (!group.getHeroId3().equals(clientInfo.getHeroId()) && group.getHerolobby3() != null) {
+							if (!group.getHerolobby3().equals(lobbyId)) {
+								sendMessageToLobby(group.getHerolobby3(), new Gson().toJson(new LFGResponse(group)));
+								if(gameFoundResponse != null){ sendMessageToLobby(group.getHerolobby1(), gameFoundResponse); }
+							} else {
+								dispatchMessage(new Message(getClientByHeroId(group.getHeroId3()).getId(), new Gson().toJson(new LFGResponse(group))));
+								if(gameFoundResponse != null){ dispatchMessage(new Message(getClientByHeroId(group.getHeroId3()).getId(), gameFoundResponse)); }
+							}
+						}
+						if (!group.getHeroId4().equals(clientInfo.getHeroId()) && group.getHerolobby4() != null) {
+							if (!group.getHerolobby4().equals(lobbyId)) {
+								sendMessageToLobby(group.getHerolobby4(), new Gson().toJson(new LFGResponse(group)));
+								if(gameFoundResponse != null){ sendMessageToLobby(group.getHerolobby1(), gameFoundResponse); }
+							} else {
+								dispatchMessage(new Message(getClientByHeroId(group.getHeroId4()).getId(), new Gson().toJson(new LFGResponse(group))));
+								if(gameFoundResponse != null){ dispatchMessage(new Message(getClientByHeroId(group.getHeroId4()).getId(), gameFoundResponse)); }
+							}
+						}
+
+						// Update database
+						DatabaseUtil.updateLFG(group);
+
+						groupUserIsIn = group;
+
+						foundGroup = true;
+						break;
+					}
+				}
+			}
+
+			Log.i(TAG, "Sending group: " + groupUserIsIn.toString() + " Foundgroup : " + foundGroup + " Already searching : " + alreadySearching);
+			if(!foundGroup && !alreadySearching){
+				groupUserIsIn.setHeroId1(hero.getId());
+				groupUserIsIn.setHeroClass1(hero.getClass_type());
+				groupUserIsIn.setHeroesJoined(groupUserIsIn.getHeroesJoined() + 1);
+				groups.add(groupUserIsIn);
+				groupUserIsIn.setHerolobby1(lobbyId);
+				Log.i(TAG, "Lobby id : " + lobbyId);
+				DatabaseUtil.addLFG(groupUserIsIn, gameType);
+				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
+				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
+			} else {
+				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
+				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
+			}
 		}
-		return server;
 	}
 
-	private ClientInfo getClientByUserId(Integer heroId) {
+	private void sendMessageToLobby(String lobbyId, String message) {
+		for(Server server : Lobby.getOtherLobbys()){
+			if(server.getId().equals(lobbyId)){
+				ClientInfo client = getClientById(server.getClientInfoId());
+				if (client != null && client.getId() != null) {
+					dispatchMessage(new Message(client.getId(), message));
+				} else {
+					Log.i(TAG, "Couldn't not find clientInfo with this clientInfoId : " + server.getClientInfoId());
+				}
+			}
+		}
+	}
+
+
+	private void handleLfgResponse(LFGResponse lfgResponse) {
+		for (int i = 0; i < mClients.size(); i++) {
+			ClientInfo cInfo = (ClientInfo) mClients.get(i);
+			if(cInfo.getHeroId() == lfgResponse.getLfg().getHeroId1()){
+				Log.i(TAG, "Sending lfg update to this hero : " + lfgResponse.getLfg().getHeroId1());
+				dispatchMessage(new Message(getClientByHeroId(cInfo.getHeroId()).getId(), new Gson().toJson(lfgResponse)));
+			}
+			if(cInfo.getHeroId() == lfgResponse.getLfg().getHeroId2()){
+				Log.i(TAG, "Sending lfg update to this hero : " + lfgResponse.getLfg().getHeroId2());
+				dispatchMessage(new Message(getClientByHeroId(cInfo.getHeroId()).getId(), new Gson().toJson(lfgResponse)));
+			}
+			if(cInfo.getHeroId() == lfgResponse.getLfg().getHeroId3()){
+				Log.i(TAG, "Sending lfg update to this hero : " + lfgResponse.getLfg().getHeroId3());
+				dispatchMessage(new Message(getClientByHeroId(cInfo.getHeroId()).getId(), new Gson().toJson(lfgResponse)));
+			}
+			if(cInfo.getHeroId() == lfgResponse.getLfg().getHeroId4()){
+				Log.i(TAG, "Sending lfg update to this hero : " + lfgResponse.getLfg().getHeroId4());
+				dispatchMessage(new Message(getClientByHeroId(cInfo.getHeroId()).getId(), new Gson().toJson(lfgResponse)));
+			}
+		}
+	}
+
+//	/**
+//	 * Send ip + port + gameId to client then let client handle joining a game server
+//	 * @param clientInfo
+//	 * @param gameType (QUICK, CUSTOM)
+//	 */
+//	private void clientJoinServer(ClientInfo clientInfo, String gameType) {
+//		int playersForParty = 2;
+//		if (gameType.equals("CUSTOM")){
+//			playersForParty = 1;
+//		}
+////		// Get a server that the client can join.
+//		// Get all users in LFG table in db then check if we got full group
+//		LFG heroInDatabase = null;
+//		ArrayList<LFG> group = new ArrayList<>();
+//		ArrayList<LFG> heroes = DatabaseUtil.getLFG();
+//		Hero myHero = DatabaseUtil.getHero(clientInfo.heroId);
+//		for (LFG hero : heroes){
+////			Log.i(TAG, "Hero looking for group " + hero.getClassType() + " highest level  " + hero.getHighestLevel());
+////			if (hero.getHeroId() != myHero.getId()) {
+////				if(!hero.getClassType().equals(myHero.getClass_type())){
+////					group.add(hero);
+////				}else {
+////					Log.i(TAG, "Don't want a hero with the same class");
+////				}
+////			} else {
+////				Log.i(TAG, "Found previous lfg of this user, update this instead of inserting new");
+////				heroInDatabase = hero;
+////			}
+//		}
+//		if ((group.size() + 1) == playersForParty) {
+//			Log.i(TAG, "Found group to play with");
+//
+//			// Get all game servers and check if one has room for a new game
+//			Server server = GameServerUtil.getGameServer(gameType);
+//			if (server != null) {
+//				// Send message to all lobbys to send out to users that we have a game
+////				for(LFG lfg : group){
+////					ClientInfo cInfo = getClientByHeroId(lfg.getHeroId());
+////					// Send to this lobbys users as well
+////					if (cInfo != null && cInfo.getId() != null) {
+////						dispatchMessage(new Message(cInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), cInfo.getHeroId(), server.getGameId()))));
+////					} else {
+////						Log.i(TAG, "Client is null, what happened?");
+////					}
+////				}
+//				if (clientInfo != null && clientInfo.getId() != null) {
+//					dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()))));
+//				} else {
+//					Log.i(TAG, "Client is null, what happened?");
+//				}
+//
+//			}else{
+//				Log.i(TAG, "Did not find a server to connect to.... What to doooo?");
+//			}
+//
+//			// Remove from database
+////			for(LFG heroesInGroup : group){
+////				DatabaseUtil.deleteHeroLFG(heroesInGroup.getHeroId(), heroesInGroup.getUserId());
+////			}
+//		} else {
+//			Log.i(TAG, "Did not find group");
+//			if (heroInDatabase != null) {
+//				DatabaseUtil.updateHeroLfg(heroInDatabase, myHero, gameType);
+//			} else {
+//				DatabaseUtil.addHeroLFG(myHero, gameType, getLobbyId());
+//			}
+//			dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
+//		}
+//	}
+
+	private ClientInfo getClientByHeroId(Integer heroId) {
 		for (int i = 0; i < mClients.size(); i++) {
 			ClientInfo clientInfo = (ClientInfo) mClients.get(i);
 			if(clientInfo.getHeroId() == heroId){
+				return clientInfo;
+			}
+		}
+		return null;
+	}
+
+	private ClientInfo getClientById(Integer clientInfoId) {
+		for (int i = 0; i < mClients.size(); i++) {
+			ClientInfo clientInfo = (ClientInfo) mClients.get(i);
+			if(clientInfo.getId() == clientInfoId){
 				return clientInfo;
 			}
 		}
@@ -273,18 +451,9 @@ public class LobbyServerDispatcher extends Thread {
 
 				}
 			}
+		}else if(clientInfo.getTypeOfConnect() != null && clientInfo.getTypeOfConnect() == ClientInfo.CLIENT){
+			DatabaseUtil.deleteHeroLFG(clientInfo.getHeroId());
 		}
-	}
-
-	/**
-	 * Adds given message to the dispatcher's message queue and notifies this
-	 * thread to wake up the message queue reader (getNextMessageFromQueue
-	 * method). dispatchMessage method is called by other threads
-	 * (warlords.game.io.ClientListener) when a message is arrived.
-	 */
-	public synchronized void dispatchMessage(Message aMessage) {
-		mMessageQueue.add(aMessage);
-		notify();
 	}
 
 	/**
@@ -300,6 +469,17 @@ public class LobbyServerDispatcher extends Thread {
 		} catch (InterruptedException ie) {
 			// Thread interrupted. Stop its execution
 		}
+	}
+
+	/**
+	 * Adds given message to the dispatcher's message queue and notifies this
+	 * thread to wake up the message queue reader (getNextMessageFromQueue
+	 * method). dispatchMessage method is called by other threads
+	 * (warlords.game.io.ClientListener) when a message is arrived.
+	 */
+	public synchronized void dispatchMessage(Message aMessage) {
+		mMessageQueue.add(aMessage);
+		notify();
 	}
 
 	public Integer getNextClientId() {
