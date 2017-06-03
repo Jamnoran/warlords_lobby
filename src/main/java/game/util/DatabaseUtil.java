@@ -353,29 +353,24 @@ public class DatabaseUtil {
 		}
 	}
 
-	public static void deleteHeroLFG(Integer heroId) {
+	public static LFG deleteHeroLFG(Integer heroId) {
 		LFG lfgToRemoveFrom = null;
 		int position = 0;
-		String lobby = null;
 
 		ArrayList<LFG> groups = getLFG();
 		for (LFG lfg : groups){
 			if(lfg.getHeroId1() == heroId){
 				position = 1;
 				lfgToRemoveFrom = lfg;
-				lobby = lfg.getHerolobby1();
 			}else if(lfg.getHeroId2() == heroId){
 				position = 2;
 				lfgToRemoveFrom = lfg;
-				lobby = lfg.getHerolobby2();
 			}else if(lfg.getHeroId3() == heroId){
 				position = 3;
 				lfgToRemoveFrom = lfg;
-				lobby = lfg.getHerolobby3();
 			}else if(lfg.getHeroId4() == heroId){
 				position = 4;
 				lfgToRemoveFrom = lfg;
-				lobby = lfg.getHerolobby4();
 			}
 		}
 
@@ -399,9 +394,9 @@ public class DatabaseUtil {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			Log.i(TAG, "Update all lobbys");
-
+			return lfgToRemoveFrom;
 		}
+		return null;
 	}
 
 
