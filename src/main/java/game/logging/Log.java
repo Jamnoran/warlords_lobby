@@ -1,5 +1,8 @@
 package game.logging;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 /**
  * Created by Jamnoran on 29-Jun-16.
  */
@@ -10,7 +13,15 @@ public class Log {
 
 	public static void i(String className, String message){
 		if (verbose) {
-			System.out.println(className + ": " + message);
+			Calendar cal = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm:ss.SSS");
+			String tab = "	";
+			if(className.length() < 6){
+				tab = "				";
+			}else if (className.length() < 12){
+				tab = "			";
+			}
+			System.out.println(sdf.format(cal.getTime()) + " [" + className + "]" + tab + message);
 		}
 	}
 
