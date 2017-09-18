@@ -24,6 +24,7 @@ public class JsonResponse implements Serializable {
 	}
 
 	public JsonResponse(String resp, String mess, Integer codeToUser) {
+		setCode("200");
 		responseType = resp;
 		message = mess;
 		code = "" + codeToUser;
