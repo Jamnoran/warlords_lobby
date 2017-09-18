@@ -23,9 +23,9 @@ public class JsonResponse implements Serializable {
 		code = "" + codeToUser;
 	}
 
-	public JsonResponse(String resp, String message, Integer codeToUser) {
+	public JsonResponse(String resp, String mess, Integer codeToUser) {
 		responseType = resp;
-		this.message = message;
+		message = mess;
 		code = "" + codeToUser;
 	}
 
