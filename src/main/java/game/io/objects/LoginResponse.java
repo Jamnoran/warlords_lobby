@@ -15,6 +15,7 @@ public class LoginResponse extends JsonResponse{
 
 	public LoginResponse(Integer uId) {
 		this.userId = uId;
+		setCode("200");
 		setResponseType("LOGIN_USER");
 	}
 
