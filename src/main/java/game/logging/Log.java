@@ -21,6 +21,7 @@ public class Log {
 				tab = "					";
 			}
 			System.out.println(sdf.format(Calendar.getInstance().getTime()) + " [" + className + "]" + tab + message);
+
 		}
 	}
 
