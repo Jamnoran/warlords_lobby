@@ -23,6 +23,12 @@ public class JsonResponse implements Serializable {
 		code = "" + codeToUser;
 	}
 
+	public JsonResponse(String resp, String message, Integer codeToUser) {
+		responseType = resp;
+		this.message = message;
+		code = "" + codeToUser;
+	}
+
 	public String getResponseType() {
 		return responseType;
 	}
