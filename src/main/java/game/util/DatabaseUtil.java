@@ -16,8 +16,9 @@ import java.util.ArrayList;
 public class DatabaseUtil {
 	private static final String TAG = DatabaseUtil.class.getSimpleName();
 	private static String ip = "warlord.ga";
-	private static String user = "ErCa";
-	private static String password = "test";
+	private static String port = "8889";
+	private static String user = "warlord_clients";
+	private static String password = "bosse45&";
 
 
 	public static User createUser(User user) {
@@ -467,7 +468,7 @@ public class DatabaseUtil {
 			return null;
 		}
 		try {
-			return DriverManager.getConnection("jdbc:mysql://" + ip + ":9996/warlords", user, password);
+			return DriverManager.getConnection("jdbc:mysql://" + ip + ":" + port + "/warlords", user, password);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! Check output console");
 			e.printStackTrace();
