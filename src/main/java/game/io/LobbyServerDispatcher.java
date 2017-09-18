@@ -75,7 +75,8 @@ public class LobbyServerDispatcher extends Thread {
 						Log.i(TAG, "Logged in user with this is: " + user.getId() + " We need to send that back to client");
 						dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LoginResponse(user.getId()))));
 					} else {
-						Log.i(TAG, "Did not find this user, send error back");
+						Log.i(TAG, "Did not find this user, send error back to the user");
+
 						dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse("LOGIN_USER","Wrong username or password", JsonResponse.WRONG_EMAIL_OR_PASSWORD))));
 					}
 				}else if (request.getRequestType().equals("GET_HEROES")){
