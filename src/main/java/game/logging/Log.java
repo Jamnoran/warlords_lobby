@@ -13,15 +13,15 @@ public class Log {
 
 	public static void i(String className, String message){
 		if (verbose) {
-			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd-HH:mm:ss.SSS");
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 			String tab = "	";
 			if(className.length() < 6){
-				tab = "				";
+				tab = "						";
 			}else if (className.length() < 12){
-				tab = "			";
+				tab = "					";
 			}
-			System.out.println(sdf.format(cal.getTime()) + " [" + className + "]" + tab + message);
+			System.out.println(sdf.format(Calendar.getInstance().getTime()) + " [" + className + "]" + tab + message);
+
 		}
 	}
 

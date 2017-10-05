@@ -30,7 +30,7 @@ public class WebserviceCommunication {
 	private static String  removeGameServer = "http://www.warlord.ga/warlords_webservice/remove_server.php";
 
 	private static final String USER_AGENT = "Mozilla/5.0";
-	private static String ip = "62.20.223.241";
+	private static String ip = "2.248.122.35";
 	private static String version = "1";
 
 	public static ArrayList<Server> getLobbyServers() {
@@ -70,7 +70,13 @@ public class WebserviceCommunication {
 		}else{
 			params = "port=" + portNumber + "&version=" + version;
 		}
-		return (RegisterLobbyResponse) sendRequest(params, registerLobby, new RegisterLobbyResponse());
+		try {
+			return (RegisterLobbyResponse) sendRequest(params, registerLobby, new RegisterLobbyResponse());
+		} catch (Exception e) {
+			Log.i(TAG, "Could  not sendRequest to registerLobby");
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static void removeLobby(String ip, int port, String id) {
@@ -102,9 +108,9 @@ public class WebserviceCommunication {
 			wr.close();
 
 			int responseCode = con.getResponseCode();
-			System.out.println("\nSending 'POST' request to URL : " + url);
-			System.out.println("Post parameters : " + params);
-			System.out.println("Response Code : " + responseCode);
+			Log.i(TAG, "Sending 'POST' request to URL : " + url);
+			Log.i(TAG, "Post parameters : " + params);
+			Log.i(TAG, "Response Code : " + responseCode);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String inputLine;

@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 public class JsonResponse implements Serializable {
 	public static final Integer CODE_SEARCHING_FOR_GROUP = 1050;
+	public static final Integer WRONG_EMAIL_OR_PASSWORD = 608;
 	public static final String JOIN_GAME_RESPONSE = "JOIN_GAME_RESPONSE";
 	@SerializedName("response_type")
 	public String responseType;
@@ -19,6 +20,12 @@ public class JsonResponse implements Serializable {
 
 	public JsonResponse(String resp, Integer codeToUser) {
 		responseType = resp;
+		code = "" + codeToUser;
+	}
+
+	public JsonResponse(String resp, String mess, Integer codeToUser) {
+		responseType = resp;
+		message = mess;
 		code = "" + codeToUser;
 	}
 
