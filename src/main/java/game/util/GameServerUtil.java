@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import game.io.WebserviceCommunication;
 import game.io.objects.GameSlotRequest;
 import game.io.objects.GameSlotResponse;
-import game.io.objects.JsonRequest;
 import game.io.objects.JsonResponse;
 import game.logging.Log;
 import game.vo.Server;
@@ -12,6 +11,7 @@ import game.vo.Server;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by Eric on 2017-03-10.
@@ -23,6 +23,7 @@ public class GameServerUtil {
 	public static Server getGameServer(String gameType) {
 		ArrayList<Server> lobbyServers = WebserviceCommunication.getGameServers();
 		if (lobbyServers != null) {
+			Collections.shuffle(lobbyServers);
 			for (Server server : lobbyServers) {
 				System.out.println(server.getId() + " Ip : " + server.getIp() + " : " + server.getPort());
 				Log.i(TAG, "Connect and see if available for creating a games");

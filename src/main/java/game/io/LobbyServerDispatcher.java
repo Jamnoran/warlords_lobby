@@ -123,7 +123,6 @@ public class LobbyServerDispatcher extends Thread {
 
 
 	private void clientJoinServer(ClientInfo clientInfo, String gameType){
-		LFG groupUserIsIn = new LFG();
 		if(gameType.equals("CUSTOM")){
 			// Send to this lobbys users as well
 			if (clientInfo != null && clientInfo.getId() != null) {
@@ -134,84 +133,89 @@ public class LobbyServerDispatcher extends Thread {
 				Log.i(TAG, "Client is null, what happened?");
 			}
 		}else if (gameType.equals("QUICK")){
-			Hero hero = DatabaseUtil.getHero(clientInfo.heroId);
-			ArrayList<LFG> groups = DatabaseUtil.getLFG();
+			joinQuickGame(clientInfo, gameType);
+		}
+	}
 
-			Log.i(TAG, "Hero wants to join a quick game : " + hero.getId() + " class : " + hero.getClass_type());
+	private void joinQuickGame(ClientInfo clientInfo, String gameType) {
+		LFG groupUserIsIn = new LFG();
+		Hero hero = DatabaseUtil.getHero(clientInfo.heroId);
+		ArrayList<LFG> groups = DatabaseUtil.getLFG();
 
-			boolean alreadySearching = false;
-			boolean foundGroup = false;
-			Iterator<LFG> lfgIterator = groups.iterator();
-			while (lfgIterator.hasNext()) {
-				LFG group = lfgIterator.next(); // must be called before you can call i.remove()
-				if(group.getHeroesJoined() < group.getMaxPlayers()){
-					Log.i(TAG, "Found a group that is not full");
-					boolean partyHasClassAlready = false;
-					if((group.getHeroClass1() != null && group.getHeroClass1().equals(hero.getClass_type())) ||
-							(group.getHeroClass2() != null && group.getHeroClass2().equals(hero.getClass_type())) ||
-							(group.getHeroClass3() != null && group.getHeroClass3().equals(hero.getClass_type())) ||
-							(group.getHeroClass4() != null && group.getHeroClass4().equals(hero.getClass_type()))){
-						partyHasClassAlready = true;
+		Log.i(TAG, "Hero wants to join a quick game : " + hero.getId() + " class : " + hero.getClass_type());
+
+		boolean alreadySearching = false;
+		boolean foundGroup = false;
+		Iterator<LFG> lfgIterator = groups.iterator();
+		while (lfgIterator.hasNext()) {
+			LFG group = lfgIterator.next(); // must be called before you can call i.remove()
+			if(group.getHeroesJoined() < group.getMaxPlayers()){
+				Log.i(TAG, "Found a group that is not full");
+				boolean partyHasClassAlready = false;
+				if((group.getHeroClass1() != null && group.getHeroClass1().equals(hero.getClass_type())) ||
+						(group.getHeroClass2() != null && group.getHeroClass2().equals(hero.getClass_type())) ||
+						(group.getHeroClass3() != null && group.getHeroClass3().equals(hero.getClass_type())) ||
+						(group.getHeroClass4() != null && group.getHeroClass4().equals(hero.getClass_type()))){
+					partyHasClassAlready = true;
+				}
+				if(group.getHeroId1() == clientInfo.heroId
+						|| group.getHeroId2() == clientInfo.heroId
+						|| group.getHeroId3() == clientInfo.heroId
+						|| group.getHeroId4() == clientInfo.heroId){
+					alreadySearching = true;
+					groupUserIsIn = group;
+				}
+				Log.i(TAG, "This hero is already searching " + alreadySearching + " Group already has this class : " + partyHasClassAlready);
+				if(!partyHasClassAlready){
+					if(group.getHeroId1() == null || group.getHeroId1() == 0){
+						group.setHeroId1(hero.getId());
+						group.setHeroClass1(hero.getClass_type());
+						group.setHerolobby1(lobbyId);
+						Log.i(TAG, "Adding hero to position 1");
+					}else if (group.getHeroId2() == null || group.getHeroId2() == 0){
+						group.setHeroId2(hero.getId());
+						group.setHeroClass2(hero.getClass_type());
+						group.setHerolobby2(lobbyId);
+						Log.i(TAG, "Adding hero to position 2");
+					} else if (group.getHeroId3() == null || group.getHeroId3() == 0){
+						group.setHeroId3(hero.getId());
+						group.setHeroClass3(hero.getClass_type());
+						group.setHerolobby3(lobbyId);
+						Log.i(TAG, "Adding hero to position 3");
+					} else if (group.getHeroId4() == null || group.getHeroId4() == 0){
+						group.setHeroId4(hero.getId());
+						group.setHeroClass4(hero.getClass_type());
+						group.setHerolobby4(lobbyId);
+						Log.i(TAG, "Adding hero to position 4");
 					}
-					if(group.getHeroId1() == clientInfo.heroId
-							|| group.getHeroId2() == clientInfo.heroId
-							|| group.getHeroId3() == clientInfo.heroId
-							|| group.getHeroId4() == clientInfo.heroId){
-						alreadySearching = true;
-						groupUserIsIn = group;
-					}
-					Log.i(TAG, "This hero is already searching " + alreadySearching + " Group already has this class : " + partyHasClassAlready);
-					if(!partyHasClassAlready){
-						if(group.getHeroId1() == null || group.getHeroId1() == 0){
-							group.setHeroId1(hero.getId());
-							group.setHeroClass1(hero.getClass_type());
-							group.setHerolobby1(lobbyId);
-							Log.i(TAG, "Adding hero to position 1");
-						}else if (group.getHeroId2() == null || group.getHeroId2() == 0){
-							group.setHeroId2(hero.getId());
-							group.setHeroClass2(hero.getClass_type());
-							group.setHerolobby2(lobbyId);
-							Log.i(TAG, "Adding hero to position 2");
-						} else if (group.getHeroId3() == null || group.getHeroId3() == 0){
-							group.setHeroId3(hero.getId());
-							group.setHeroClass3(hero.getClass_type());
-							group.setHerolobby3(lobbyId);
-							Log.i(TAG, "Adding hero to position 3");
-						} else if (group.getHeroId4() == null || group.getHeroId4() == 0){
-							group.setHeroId4(hero.getId());
-							group.setHeroClass4(hero.getClass_type());
-							group.setHerolobby4(lobbyId);
-							Log.i(TAG, "Adding hero to position 4");
-						}
-						group.setHeroesJoined(group.getHeroesJoined() + 1);
+					group.setHeroesJoined(group.getHeroesJoined() + 1);
 
-						findServerForGroup(clientInfo, group, gameType, false);
+					findServerForGroup(clientInfo, group, gameType, false);
 
-						// Update database
-						DatabaseUtil.updateLFG(group);
+					// Update database
+					DatabaseUtil.updateLFG(group);
 
-						groupUserIsIn = group;
+					groupUserIsIn = group;
 
-						foundGroup = true;
-						break;
-					}
+					foundGroup = true;
+					break;
 				}
 			}
+		}
 
-			Log.i(TAG, "Sending group: " + groupUserIsIn.toString() + " Found group : " + foundGroup + " Already searching : " + alreadySearching);
-			if(!foundGroup && !alreadySearching){
-				groupUserIsIn.setHeroId1(hero.getId());
-				groupUserIsIn.setHeroClass1(hero.getClass_type());
-				groupUserIsIn.setHeroesJoined(groupUserIsIn.getHeroesJoined() + 1);
-				groupUserIsIn.setHerolobby1(lobbyId);
-				Log.i(TAG, "Lobby id : " + lobbyId);
-				DatabaseUtil.addLFG(groupUserIsIn, gameType);
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
-			} else {
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
-			}
+		Log.i(TAG, "Sending group: " + groupUserIsIn.toString() + " Found group : " + foundGroup + " Already searching : " + alreadySearching);
+		if(!foundGroup && !alreadySearching){
+			groupUserIsIn.setHeroId1(hero.getId());
+			groupUserIsIn.setHeroClass1(hero.getClass_type());
+			groupUserIsIn.setHeroesJoined(groupUserIsIn.getHeroesJoined() + 1);
+			groupUserIsIn.setHerolobby1(lobbyId);
+			Log.i(TAG, "Lobby id : " + lobbyId);
+			DatabaseUtil.addLFG(groupUserIsIn, gameType);
+			dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
+			dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
+		} else {
+			dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse(JsonResponse.JOIN_GAME_RESPONSE, JsonResponse.CODE_SEARCHING_FOR_GROUP))));
+			dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LFGResponse(groupUserIsIn))));
 		}
 	}
 
