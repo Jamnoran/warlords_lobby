@@ -23,11 +23,12 @@ import java.util.ArrayList;
  */
 public class WebserviceCommunication {
 	private static final String TAG = WebserviceCommunication.class.getSimpleName();
-	private static String lobbyUrl = "http://www.warlord.ga/warlords_webservice/lobbys.json";
-	private static String gameUrl = "http://www.warlord.ga/warlords_webservice/game_servers.json";
-	private static String  registerLobby = "http://www.warlord.ga/warlords_webservice/register_lobby.php";
-	private static String  removeLobby = "http://www.warlord.ga/warlords_webservice/remove_lobby.php";
-	private static String  removeGameServer = "http://www.warlord.ga/warlords_webservice/remove_server.php";
+	private static String main = "http://www.warlord.ga:8000";
+	private static String lobbyUrl = main + "/warlords_webservice/lobbys.json";
+	private static String gameUrl = main + "/warlords_webservice/game_servers.json";
+	private static String  registerLobby = main + "/warlords_webservice/register_lobby.php";
+	private static String  removeLobby = main + "/warlords_webservice/remove_lobby.php";
+	private static String  removeGameServer = main + "/warlords_webservice/remove_server.php";
 
 	private static final String USER_AGENT = "Mozilla/5.0";
 	private static String ip = "2.248.122.35";
