@@ -232,6 +232,7 @@ public class LobbyServerDispatcher extends Thread {
 	}
 
 	private void findServerForGroup(ClientInfo clientInfo, LFG group, String gameType, boolean forceStart) {
+		Log.i(TAG, "Starting to find a game for the client of gametype : " + gameType + " User id : " + clientInfo.getId());
 		String gameFoundResponse = null;
 		if(group.getHeroesJoined() == group.getMaxPlayers() || forceStart){
 			Server server = GameServerUtil.getGameServer(gameType);
