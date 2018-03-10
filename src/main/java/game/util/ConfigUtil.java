@@ -31,9 +31,15 @@ public class ConfigUtil {
 		String path = null;
 		try {
 			URL url = ClassLoader.getSystemClassLoader().getResource(".");
-			path = url.getPath() + "/main.properties";
+			if(url != null){
+				path = url.getPath() + "/main.properties";
+			}else{
+				path = "main.properties";
+			}
+			Log.i(ConfigUtil.class.getSimpleName(), "Path: " + path);
 		} catch (Exception e) {
 			e.printStackTrace();
+			// TODO Generate file
 		}
 
 		//load the file handle for main.properties

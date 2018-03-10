@@ -16,7 +16,7 @@ public class Test {
 //		String newJson = json.substring(json.indexOf(responseTypeString) + responseTypeString.length());
 //		System.out.println(newJson.substring(0, newJson.indexOf("\"")));
 
-//		Log.i(TAG, "Hero : " + DatabaseUtil.getHero(16));
+		Log.i(TAG, "Hero : " + DatabaseUtil.getHero(16));
 
 //
 //		Random rand = new Random();

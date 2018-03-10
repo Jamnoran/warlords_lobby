@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class Lobby {
 	private static final String TAG = Lobby.class.getSimpleName();
 	// Configuration;
-	static Integer portNumber;
+	static Integer portNumber = 2060;
 
 	private static LobbyServerDispatcher lobbyServerDispatcher;
 	private static ArrayList<Server> otherLobbys;
@@ -35,7 +35,7 @@ public class Lobby {
 	public static void main(String[] args) {
 		Log.i(TAG, "Lobby is up and running!");
 
-		portNumber = ConfigUtil.getPort();
+		//portNumber = ConfigUtil.getPort();
 
 		Log.i(TAG, "Read this port from file: " + portNumber);
 
