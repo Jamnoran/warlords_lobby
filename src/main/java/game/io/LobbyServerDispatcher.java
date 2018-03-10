@@ -67,6 +67,10 @@ public class LobbyServerDispatcher extends Thread {
 					User user = DatabaseUtil.createUser(new User(createUserRequest.getUsername(), createUserRequest.getEmail(), createUserRequest.getPassword()));
 					Log.i(TAG, "Created user with this is: " + user.getId() + " We need to send that back to client");
 					dispatchMessage(new Message(clientInfo.getId(), "{\"response_type\":\"CREATE_USER\", \"user_id\" : \"" + user.getId() + "\"}"));
+				}else if (request.getRequestType().equals("UPDATE_USERNAME")){
+					UpdateUsernameRequest updateUsernameRequest = gson.fromJson(aMessage.getMessage(), UpdateUsernameRequest.class);
+					Log.i(TAG, "Updating username " + updateUsernameRequest.toString());
+					updateUsername(updateUsernameRequest);
 				}else if (request.getRequestType().equals("LOGIN_USER")){
 					CreateUserRequest createUserRequest = gson.fromJson(aMessage.getMessage(), CreateUserRequest.class);
 					Log.i(TAG, "User is trying to login: " + createUserRequest.toString());
@@ -100,6 +104,11 @@ public class LobbyServerDispatcher extends Thread {
 		if (request != null) {
 			notify();
 		}
+	}
+
+	private void updateUsername(UpdateUsernameRequest updateUsernameRequest) {
+		Log.i(TAG, "Updating username to " + updateUsernameRequest.getUsername() + " on userId: " + updateUsernameRequest.getUser_id());
+		DatabaseUtil.updateUsername(Integer.parseInt(updateUsernameRequest.getUser_id()), updateUsernameRequest.getUsername());
 	}
 
 
