@@ -270,6 +270,26 @@ public class DatabaseUtil {
 		return hero;
 	}
 
+
+	public static void updateUsername(int heroId, String username) {
+		// Check first if username is taken
+
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				stmt.executeUpdate("UPDATE users set username = \"" + username + "\" where id = " + heroId);
+				Log.i(TAG, "Update username to : " + username);
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+	}
+
 	public static ArrayList<LFG> getLFG() {
 		ArrayList<LFG> lfgs = new ArrayList<>();
 		Connection connection = getConnection();
@@ -475,5 +495,4 @@ public class DatabaseUtil {
 			return null;
 		}
 	}
-
 }
