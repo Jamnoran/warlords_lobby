@@ -8,6 +8,7 @@ import game.util.DatabaseUtil;
 import game.util.GameServerUtil;
 import game.vo.*;
 
+import java.awt.image.DataBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
@@ -96,6 +97,8 @@ public class LobbyServerDispatcher extends Thread {
 					LFGResponse lfgResponse = gson.fromJson(aMessage.getMessage(), LFGResponse.class);
 					Log.i(TAG, "Wanting to cancel game search : " + lfgResponse.toString());
 					handleCancelGame(clientInfo, lfgResponse.getLfg());
+				}else if (request.getRequestType().equals("GET_USERNAME")) {
+					returnUsername(request, clientInfo);
 				}
 			}else{
 				Log.i(TAG, "Could not parse request " + aMessage.getMessage());
@@ -104,6 +107,14 @@ public class LobbyServerDispatcher extends Thread {
 		if (request != null) {
 			notify();
 		}
+	}
+
+
+	private void returnUsername(JsonRequest request, ClientInfo clientInfo) {
+		User user = DatabaseUtil.getUser(Integer.parseInt(request.user_id));
+		String data = new Gson().toJson(new UsernameResponse(user.getUsername()));
+		Log.i(TAG, "Return username : " + user.getUsername());
+		dispatchMessage(new Message(clientInfo.getId(), data));
 	}
 
 	private void updateUsername(UpdateUsernameRequest updateUsernameRequest) {
