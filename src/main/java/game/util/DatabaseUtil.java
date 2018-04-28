@@ -76,6 +76,31 @@ public class DatabaseUtil {
 		return user;
 	}
 
+	public static User getUser(String userName) {
+		User user = null;
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT id, username, email, password FROM users where username = " + userName);
+				while (rs.next()) {
+					user = new User();
+					//Retrieve by column name
+					user.setId(rs.getInt("id"));
+					user.setUsername(rs.getString("username"));
+				}
+				rs.close();
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+		return user;
+	}
+
 	public static User getUser(String email, String password) {
 		User user = null;
 		Connection connection = getConnection();
