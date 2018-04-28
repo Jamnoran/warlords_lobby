@@ -71,7 +71,7 @@ public class LobbyServerDispatcher extends Thread {
 				}else if (request.getRequestType().equals("UPDATE_USERNAME")){
 					UpdateUsernameRequest updateUsernameRequest = gson.fromJson(aMessage.getMessage(), UpdateUsernameRequest.class);
 					Log.i(TAG, "Updating username " + updateUsernameRequest.toString());
-					updateUsername(updateUsernameRequest);
+					updateUsername(updateUsernameRequest, clientInfo);
 				} else if (request.getRequestType().equals("GET_USERNAME")) {
 					returnUsername(request, clientInfo);
 				} else if (request.getRequestType().equals("LOGIN_USER")){
@@ -117,11 +117,17 @@ public class LobbyServerDispatcher extends Thread {
 		dispatchMessage(new Message(clientInfo.getId(), data));
 	}
 
-	private void updateUsername(UpdateUsernameRequest updateUsernameRequest) {
+	private void updateUsername(UpdateUsernameRequest updateUsernameRequest, ClientInfo clientInfo) {
 		Log.i(TAG, "Updating username to " + updateUsernameRequest.getUsername() + " on userId: " + updateUsernameRequest.getUser_id());
-		DatabaseUtil.updateUsername(Integer.parseInt(updateUsernameRequest.getUser_id()), updateUsernameRequest.getUsername());
+		User user = DatabaseUtil.getUser(Integer.parseInt(updateUsernameRequest.getUsername()));
+		if(user == null){
+			Log.i(TAG, "Username is free");
+			DatabaseUtil.updateUsername(Integer.parseInt(updateUsernameRequest.getUser_id()), updateUsernameRequest.getUsername());
+		}else{
+			Log.i(TAG, "Username is already taken, send fail back to client");
+			dispatchMessage(new Message(clientInfo.getId(), "{\"response_type\":\"UPDATE_USERNAME\", \"status\" : "+ JsonResponse.CODE_USERNAME_TAKEN +"}"));
+		}
 	}
-
 
 	private void returnHeroes(JsonRequest request, ClientInfo clientInfo) {
 		Log.i(TAG, "User wants his heroes: " + request.toString());
