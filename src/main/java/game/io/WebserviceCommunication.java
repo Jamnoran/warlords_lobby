@@ -23,7 +23,7 @@ import java.util.ArrayList;
  */
 public class WebserviceCommunication {
 	private static final String TAG = WebserviceCommunication.class.getSimpleName();
-	private static String main = "http://www.warlord.ga:8000";
+	private static String main = "http://erca.online:8000";
 	private static String lobbyUrl = main + "/warlords_webservice/lobbys.json";
 	private static String gameUrl = main + "/warlords_webservice/game_servers.json";
 	private static String  registerLobby = main + "/warlords_webservice/register_lobby.php";
