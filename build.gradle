@@ -12,7 +12,7 @@ task wrapper(type: Wrapper) {
 jar {
     manifest {
         attributes 'Implementation-Title': 'Gradle Quickstart',
-                'Main-Class': 'game.Server'
+                'Main-Class': 'game.Lobby'
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
