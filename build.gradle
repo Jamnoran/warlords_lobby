@@ -9,7 +9,18 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.3'
 }
 
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                'Main-Class': 'game.Server'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 dependencies {
+    compile 'com.google.code.gson:gson:2.3'
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'mysql:mysql-connector-java:5.1.6'
 }
