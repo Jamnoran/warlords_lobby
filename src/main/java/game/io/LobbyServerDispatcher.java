@@ -112,8 +112,12 @@ public class LobbyServerDispatcher extends Thread {
 
 	private void returnUsername(JsonRequest request, ClientInfo clientInfo) {
 		User user = DatabaseUtil.getUser(Integer.parseInt(request.user_id));
-		String data = new Gson().toJson(new UsernameResponse(user.getUsername()));
-		Log.i(TAG, "Return username : " + user.getUsername());
+		String userName = "";
+		if(user != null && user.getUsername() != null){
+			userName = user.getUsername();
+		}
+		String data = new Gson().toJson(new UsernameResponse(userName));
+		Log.i(TAG, "Return username : " + userName);
 		dispatchMessage(new Message(clientInfo.getId(), data));
 	}
 
