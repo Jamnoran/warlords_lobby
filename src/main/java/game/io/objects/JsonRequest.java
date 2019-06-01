@@ -17,6 +17,8 @@ public class JsonRequest implements Serializable {
 	public String requestType;
 	@SerializedName("user_id")
 	public String user_id;
+	@SerializedName("sign")
+	public String sign = null;
 
 	public JsonRequest() {
 	}
@@ -53,11 +55,29 @@ public class JsonRequest implements Serializable {
 		this.user_id = user_id;
 	}
 
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
 	@Override
 	public String toString() {
 		return "JsonRequest{" +
 				"requestType='" + requestType + '\'' +
 				", user_id='" + user_id + '\'' +
 				'}';
+	}
+
+	public void clearSign() {
+		sign = null;
+	}
+
+	public String getSignAndClear() {
+		String tempSign = sign;
+		sign = null;
+		return tempSign;
 	}
 }

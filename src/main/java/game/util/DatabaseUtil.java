@@ -7,6 +7,9 @@ import game.vo.classes.Rogue;
 import game.vo.classes.Warlock;
 import game.vo.classes.Warrior;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -54,7 +57,7 @@ public class DatabaseUtil {
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT id, username, email, password FROM users where id = " + id);
+				ResultSet rs = stmt.executeQuery("SELECT id, username, email, password, login_key FROM users where id = " + id);
 				while (rs.next()) {
 					user = new User();
 					//Retrieve by column name
@@ -62,6 +65,7 @@ public class DatabaseUtil {
 					user.setUsername(rs.getString("username"));
 					user.setEmail(rs.getString("email"));
 					user.setPassword(rs.getString("password"));
+					user.setLoginKey(rs.getString("login_key"));
 					//Display values
 				}
 				rs.close();
@@ -82,12 +86,13 @@ public class DatabaseUtil {
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT id, username, email, password FROM users where username = " + userName);
+				ResultSet rs = stmt.executeQuery("SELECT id, username, email, password, login_key FROM users where username = " + userName);
 				while (rs.next()) {
 					user = new User();
 					//Retrieve by column name
 					user.setId(rs.getInt("id"));
 					user.setUsername(rs.getString("username"));
+					user.setLoginKey(rs.getString("login_key"));
 				}
 				rs.close();
 				stmt.close();
@@ -126,9 +131,43 @@ public class DatabaseUtil {
 		} else {
 			Log.i(TAG, "Failed to make connection!");
 		}
+		// Create loginKey and update database
+		if (user != null) {
+			user.setLoginKey(generateLoginKey());
+			updateUser(user);
+		}
 		return user;
 	}
 
+	public static String generateLoginKey() {
+		KeyGenerator keyGen = null;
+		try {
+			keyGen = KeyGenerator.getInstance("AES");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		keyGen.init(128); // for example
+		SecretKey secretKey = keyGen.generateKey();
+		return CalculationUtil.bytesToHex(secretKey.getEncoded());
+	}
+
+	public static User updateUser(User user) {
+		Connection connection = getConnection();
+		if (connection != null) {
+			try {
+				Statement stmt = connection.createStatement();
+				stmt.executeUpdate(user.getSqlUpdateQuery());
+				Log.i(TAG, "Update user with new loginKey userId: " + user.getId() + " key: " + user.getLoginKey());
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.i(TAG, "Failed to make connection!");
+		}
+		return user;
+	}
 
 	public static Hero createHero(Integer userId, String classType) {
 		Connection connection = getConnection();

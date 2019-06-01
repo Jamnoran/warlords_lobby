@@ -41,9 +41,9 @@ public class LobbyServerDispatcher extends Thread {
 		JsonRequest request = null;
 		if (aMessage != null && aMessage.getMessage() != null) {
 			request = JsonRequest.parse(aMessage);
-
 			if (request != null && request.getRequestType() != null) {
 				Log.i(TAG, "Got this request" + request.toString());
+				User loggedInUser = DatabaseUtil.getUser(request.getUser_id());
 				if(request.getRequestType().equals("CLIENT_TYPE")){
 					Log.i(TAG, "Sending this message : " + new Gson().toJson(new ClientTypeResponse(ClientInfo.LOBBY)));
 					dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new ClientTypeResponse(ClientInfo.LOBBY))));
@@ -71,19 +71,19 @@ public class LobbyServerDispatcher extends Thread {
 				}else if (request.getRequestType().equals("UPDATE_USERNAME")){
 					UpdateUsernameRequest updateUsernameRequest = gson.fromJson(aMessage.getMessage(), UpdateUsernameRequest.class);
 					Log.i(TAG, "Updating username " + updateUsernameRequest.toString());
+					AuthenticationService.checkAuthentication(updateUsernameRequest, loggedInUser, updateUsernameRequest.getSignAndClear());
 					updateUsername(updateUsernameRequest, clientInfo);
 				} else if (request.getRequestType().equals("GET_USERNAME")) {
 					returnUsername(request, clientInfo);
 				} else if (request.getRequestType().equals("LOGIN_USER")){
-					CreateUserRequest createUserRequest = gson.fromJson(aMessage.getMessage(), CreateUserRequest.class);
+					LoginUserRequest createUserRequest = gson.fromJson(aMessage.getMessage(), LoginUserRequest.class);
 					Log.i(TAG, "User is trying to login: " + createUserRequest.toString());
 					User user = DatabaseUtil.getUser(createUserRequest.getEmail(), createUserRequest.getPassword());
 					if (user != null) {
 						Log.i(TAG, "Logged in user with this is: " + user.getId() + " We need to send that back to client");
-						dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LoginResponse(user.getId()))));
+						dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new LoginResponse(user.getId(), user.getLoginKey()))));
 					} else {
 						Log.i(TAG, "Did not find this user, send error back to the user");
-
 						dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new JsonResponse("LOGIN_USER","Wrong username or password", JsonResponse.WRONG_EMAIL_OR_PASSWORD))));
 					}
 				}else if (request.getRequestType().equals("GET_HEROES")){
@@ -117,7 +117,7 @@ public class LobbyServerDispatcher extends Thread {
 			userName = user.getUsername();
 		}
 		String data = new Gson().toJson(new UsernameResponse(userName));
-		Log.i(TAG, "Return username : " + userName);
+		Log.i(TAG, "Return username request: " + data);
 		dispatchMessage(new Message(clientInfo.getId(), data));
 	}
 

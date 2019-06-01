@@ -1,0 +1,7 @@
+12/01 15:43:54.313 [Lobby]						Lobby started on port 2075
+12/01 15:44:24.119 [Lobby]						Lobby is up and running!
+12/01 15:44:24.124 [Lobby]						Read this port from file: 2075
+12/01 15:44:24.219 [WebserviceCommunication]	Sending 'POST' request to URL : http://erca.online:8000/warlords_webservice/register_lobby.php
+12/01 15:44:24.225 [WebserviceCommunication]	Post parameters : ip=2.248.122.35&port=2075&version=1
+12/01 15:44:24.231 [WebserviceCommunication]	Response Code : 200
+12/01 15:44:24.334 [Lobby]						Lobby started on port 2075

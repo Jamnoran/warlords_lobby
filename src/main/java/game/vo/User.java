@@ -9,6 +9,7 @@ public class User {
 	private String username;
 	private String email;
 	private String password;
+	private String loginKey;
 
 	public User() {
 	}
@@ -51,6 +52,14 @@ public class User {
 		this.password = password;
 	}
 
+	public String getLoginKey() {
+		return loginKey;
+	}
+
+	public void setLoginKey(String loginKey) {
+		this.loginKey = loginKey;
+	}
+
 	@Override
 	public String toString() {
 		return "User{" +
@@ -63,5 +72,9 @@ public class User {
 
 	public String getSqlInsertQuery() {
 		return "INSERT INTO `warlords`.`users` (`id`, `username`, `password`, `email`) VALUES (NULL, '" + getUsername() + "', '" + getPassword() + "', '" + getEmail() + "')";
+	}
+
+	public String getSqlUpdateQuery() {
+		return "UPDATE `users` SET `login_key`=\"" + getLoginKey() + "\" WHERE id=" + getId();
 	}
 }

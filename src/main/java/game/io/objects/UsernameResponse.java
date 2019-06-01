@@ -1,23 +1,19 @@
 package game.io.objects;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Eric on 2017-03-10.
  */
-public class UsernameResponse {
+public class UsernameResponse extends JsonResponse{
 
-	private String response_type = "USERNAME_RESPONSE";
-	public String username;
+	@SerializedName("username")
+	private String username;
 
 	public UsernameResponse(String username) {
 		this.username = username;
-	}
-
-	public String getResponse_type() {
-		return response_type;
-	}
-
-	public void setResponse_type(String response_type) {
-		this.response_type = response_type;
+		setCode("200");
+		setResponseType("USERNAME_RESPONSE");
 	}
 
 	public String getUsername() {
@@ -31,7 +27,6 @@ public class UsernameResponse {
 	@Override
 	public String toString() {
 		return "UsernameResponse{" +
-				"response_type='" + response_type + '\'' +
 				", username='" + username + '\'' +
 				'}';
 	}
