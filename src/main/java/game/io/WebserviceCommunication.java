@@ -23,7 +23,7 @@ import java.util.ArrayList;
  */
 public class WebserviceCommunication {
 	private static final String TAG = WebserviceCommunication.class.getSimpleName();
-	private static String main = "http://erca.online:8000";
+	private static String main = "http://jamnoran.se";
 	private static String lobbyUrl = main + "/warlords_webservice/lobbys.json";
 	private static String gameUrl = main + "/warlords_webservice/game_servers.json";
 	private static String  registerLobby = main + "/warlords_webservice/register_lobby.php";
@@ -31,7 +31,8 @@ public class WebserviceCommunication {
 	private static String  removeGameServer = main + "/warlords_webservice/remove_server.php";
 
 	private static final String USER_AGENT = "Mozilla/5.0";
-	private static String ip = "2.248.122.35";
+	private static String ip = "158.174.113.85";
+	// private static String ip = "2.248.122.35";
 	private static String version = "1";
 
 	public static ArrayList<Server> getLobbyServers() {
