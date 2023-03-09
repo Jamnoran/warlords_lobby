@@ -159,8 +159,13 @@ public class LobbyServerDispatcher extends Thread {
 			// Send to this lobbys users as well
 			if (clientInfo != null && clientInfo.getId() != null) {
 				Server server = GameServerUtil.getGameServer(gameType);
-				dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()))));
-				Log.i(TAG, "User wanted to play custom game, sending server");
+				if(server != null){
+					dispatchMessage(new Message(clientInfo.getId(), new Gson().toJson(new GameFoundResponse(server.getIp(), server.getPort(), server.getId(), clientInfo.getHeroId(), server.getGameId()))));
+					Log.i(TAG, "User wanted to play custom game, sending server");
+				}else {
+					Log.i(TAG, "No servers online that can take a game, not good!");
+				}
+
 			} else {
 				Log.i(TAG, "Client is null, what happened?");
 			}

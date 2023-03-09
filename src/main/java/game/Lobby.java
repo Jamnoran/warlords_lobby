@@ -79,10 +79,11 @@ public class Lobby {
 		// Accept and handle client connections
 		while (true) {
 			Socket socket = null;
+			Log.i(TAG, "Trying to accept connection");
 			try {
 				socket = serverSocket.accept();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.i(TAG, "Exception accepting: " + e.toString());
 			}
 			Log.i(TAG, "Incoming connection");
 

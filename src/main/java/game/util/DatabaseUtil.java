@@ -18,8 +18,8 @@ import java.util.ArrayList;
  */
 public class DatabaseUtil {
 	private static final String TAG = DatabaseUtil.class.getSimpleName();
-	private static String ip = "erca.online";
-	private static String port = "8889";
+	private static String ip = "jamnoran.se";
+	private static String port = "9906";
 	private static String user = "warlord_clients";
 	private static String password = "bosse45&";
 
@@ -156,7 +156,7 @@ public class DatabaseUtil {
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				stmt.executeUpdate(user.getSqlUpdateQuery());
+				// stmt.executeUpdate(user.getSqlUpdateQuery());
 				Log.i(TAG, "Update user with new loginKey userId: " + user.getId() + " key: " + user.getLoginKey());
 				stmt.close();
 				connection.close();
@@ -491,7 +491,7 @@ public class DatabaseUtil {
 		if (connection != null) {
 			try {
 				Statement stmt = connection.createStatement();
-				String query = "INSERT INTO `warlords`.`chat` (`user_id`, `message`, `group_id`, `time`) VALUES (" + userId + ", '" + message + "', " + groupId + ", " + time + ")";
+				String query = "INSERT INTO `warlord`.`chat` (`user_id`, `message`, `group_id`, `time`) VALUES (" + userId + ", '" + message + "', " + groupId + ", " + time + ")";
 				stmt.executeUpdate(query);
 				int autoIncKeyFromApi = -1;
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -552,7 +552,7 @@ public class DatabaseUtil {
 			return null;
 		}
 		try {
-			return DriverManager.getConnection("jdbc:mysql://" + ip + ":" + port + "/warlords", user, password);
+			return DriverManager.getConnection("jdbc:mysql://" + ip + ":" + port + "/warlord", user, password);
 		} catch (SQLException e) {
 			System.out.println("Connection Failed! Check output console");
 			e.printStackTrace();

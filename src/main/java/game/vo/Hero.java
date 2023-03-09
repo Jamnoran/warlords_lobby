@@ -286,7 +286,7 @@ public class Hero {
 	}
 
 	public String getSqlInsertLFGQuery(String gameType, String lobbyId) {
-		return "INSERT INTO `warlords`.`lfg` (`user_id`, `game_type`, `hero_id`, `lobby_id`) VALUES ('" + getUser_id() + "', '" + gameType + "', '" + getId() + "', '" + lobbyId + "')";
+		return "INSERT INTO `warlord`.`lfg` (`user_id`, `game_type`, `hero_id`, `lobby_id`) VALUES ('" + getUser_id() + "', '" + gameType + "', '" + getId() + "', '" + lobbyId + "')";
 	}
 
 	public String getSqlUpdateLFGQuery(LFG lfg,String gameType) {
@@ -295,7 +295,7 @@ public class Hero {
 
 
 	public String getSqlInsertQuery() {
-		return "INSERT INTO `warlords`.`heroes` (`id`, `user_id`, `xp`, `level`, `class_type`, `top_game_lvl`) VALUES (NULL, '" + getUser_id() + "', '" + getXp() + "', '" + getLevel() + "', '" + getClass_type() +  "', '" + getTopGameLvl() + "')";
+		return "INSERT INTO `warlord`.`heroes` (`id`, `user_id`, `xp`, `level`, `class_type`, `top_game_lvl`) VALUES (NULL, '" + getUser_id() + "', '" + getXp() + "', '" + getLevel() + "', '" + getClass_type() +  "', '" + getTopGameLvl() + "')";
 	}
 
 	public String getSqlUpdateQuery() {
